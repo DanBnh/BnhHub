@@ -1502,12 +1502,16 @@ const savedSpeed=localStorage.getItem('bnhhub-speed'); if(savedSpeed){document.q
     return '<div class="flamengo-match"><span class="flamengo-team"><img alt="Escudo '+esc(hi.displayName||'Mandante')+'" loading="lazy" src="'+esc(teamIcon(hi))+'"></span><div class="flamengo-match-center"><span class="flamengo-match-title">'+esc(hi.displayName||'Mandante')+' × '+esc(ai.displayName||'Visitante')+'</span><b class="flamengo-score">'+score+'</b><div class="flamengo-match-info"><span class="flamengo-competition"><span class="official-mark">✓</span>'+esc(comp.toUpperCase())+' OFICIAL</span><span class="flamengo-match-meta"><span class="agenda-date">'+fmtDate(ev.date)+'</span> • <span class="agenda-time">'+(completed?'FINALIZADO':fmtTime(ev.date))+'</span></span>'+chanHtml+'</div></div><span class="flamengo-team"><img alt="Escudo '+esc(ai.displayName||'Visitante')+'" loading="lazy" src="'+esc(teamIcon(ai))+'"></span></div>';
   }
   function renderAgenda(events){
-    const now=Date.now();const sorted=[...events].filter(e=>e?.date).sort((a,b)=>new Date(a.date)-new Date(b.date));
-    const past=sorted.filter(e=>new Date(e.date).getTime()<=now).slice(-3);const future=sorted.filter(e=>new Date(e.date).getTime()>now).slice(0,3);const last=current?.name||'Clube';
+    const now=Date.now();
+    const sorted=[...events].filter(e=>e?.date).sort((a,b)=>new Date(a.date)-new Date(b.date));
+    const past=sorted.filter(e=>new Date(e.date).getTime()<=now).slice(-3);
+    const future=sorted.filter(e=>new Date(e.date).getTime()>now).slice(0,3);
+    const last=current?.name||'Clube';
+    const logo=current?.logo||fallbackLogo;
+    const head='<div class="flamengo-set-title selected-agenda-badge"><img src="'+esc(logo)+'" alt="">'+esc(last.toUpperCase())+'</div>';
     const mk=(title,items)=>'<div class="flamengo-set"><div class="flamengo-set-title"><span class="set-dot"></span>'+title+'</div>'+(items.length?items.map(renderMatchCard).join(''):'<div class="agenda-loading">Sem jogos nesta janela</div>')+'</div>';
-    const logo=current?.logo||fallbackLogo;const head='<div class="flamengo-set-title selected-agenda-badge"><img src="'+esc(logo)+'" alt="">'+esc(last.toUpperCase())+'</div>';const inner=mk('ÚLTIMOS 3',past)+'<div class="flamengo-divider"></div>'+mk('PRÓXIMOS 3',future);const set='<div class="flamengo-set">'+head+'</div><div class="flamengo-divider"></div>'+inner;
-    strip.innerHTML='<div class="flamengo-viewport"><div class="flamengo-track" id="clubAgendaTrack"><div class="club-agenda-loop">'+set+'</div><div class="club-agenda-loop">'+set+'</div></div></div>';
-    const track=document.getElementById('clubAgendaTrack');if(track){track.style.animation='flamengoScroll 34s linear infinite';if(document.body.classList.contains('no-motion'))track.style.animationPlayState='paused'}
+    // A agenda fica fixa: exatamente 3 jogos anteriores e 3 próximos, sem carrossel/rolagem automática.
+    strip.innerHTML='<div class="flamengo-agenda-static">'+head+'<div class="flamengo-divider"></div><div class="flamengo-agenda-columns">'+mk('ÚLTIMOS 3',past)+mk('PRÓXIMOS 3',future)+'</div></div>';
   }
   function ymd(d){return d.toISOString().slice(0,10).replaceAll('-','')}
   async function directScoreboard(league){
@@ -1525,25 +1529,28 @@ const savedSpeed=localStorage.getItem('bnhhub-speed'); if(savedSpeed){document.q
     return out;
   }
   async function loadSchedule(t){
-    strip.innerHTML='<div class="agenda-loading">BUSCANDO PRÓXIMOS JOGOS NA ESPN • '+esc(t.name)+'…</div>';
+    strip.innerHTML='<div class="agenda-loading">CARREGANDO AGENDA ESPN • '+esc(t.name)+'…</div>';
     try{
-      // Fonte oficial da agenda: ESPN. O placar também fornece os escudos/logos oficiais das duas equipes.
-      // Usamos uma janela ampla para encontrar partidas futuras mesmo quando a equipe é uma entrada estática.
-      const data=await directScoreboard(t.league);
-      let events=eventsForTeam(data,t);
-      if(!events.length && !String(t.id).startsWith('static-')){
+      let events=[];
+      // Para times cadastrados na ESPN, usamos primeiro o endpoint de agenda do próprio time,
+      // que contém jogos passados e futuros. Para entradas estáticas, usamos o scoreboard da ESPN.
+      if(!String(t.id).startsWith('static-')){
         const r=await fetch(apiBase+encodeURIComponent(t.league)+'/teams/'+encodeURIComponent(t.id)+'/schedule',{cache:'no-store'});
         if(r.ok){
           const schedule=await r.json();
           events=Array.isArray(schedule.events)?schedule.events:[];
         }
       }
+      if(!events.length){
+        const data=await directScoreboard(t.league);
+        events=eventsForTeam(data,t);
+      }
       if(events.length){
         renderAgenda(events);
         return;
       }
       const when=new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
-      strip.innerHTML='<div class="agenda-error">A ESPN não retornou próximos jogos para '+esc(t.name)+' nesta janela ('+when+').</div>';
+      strip.innerHTML='<div class="agenda-error">A ESPN não encontrou jogos para '+esc(t.name)+' agora ('+when+').</div>';
     }catch(e){
       const when=new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
       strip.innerHTML='<div class="agenda-error">Não foi possível consultar a ESPN agora ('+when+'). Tente novamente pelo escudo do time.</div>';
