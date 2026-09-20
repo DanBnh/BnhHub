@@ -752,7 +752,7 @@ body{padding-top:136px !important;}
 
 
 /* ===== GERENCIADOR DE CONTEÚDO ===== */
-.portfolio-add-setting{margin-top:12px;width:100%;border:1px solid #39ff00;background:#39ff00;color:#050505;padding:12px 14px;border-radius:8px;font-weight:800;font-size:11px;letter-spacing:.5px;cursor:pointer;transition:.2s}.portfolio-add-setting:hover{filter:brightness(1.08);transform:translateY(-1px)}.content-manager{border:1px solid rgba(var(--accent-rgb),.16);border-radius:14px;background:linear-gradient(145deg,rgba(14,21,15,.9),rgba(5,9,6,.82));padding:14px;margin:8px 0 16px;box-shadow:inset 0 1px rgba(255,255,255,.035)}
+.portfolio-add-setting{margin-top:12px;width:100%;border:1px solid #39ff00;background:#39ff00;color:#050505;padding:12px 14px;border-radius:8px;font-weight:800;font-size:11px;letter-spacing:.5px;cursor:pointer;transition:.2s}.portfolio-add-setting:hover{filter:brightness(1.08);transform:translateY(-1px)}.portfolio-icon-setting{margin-top:12px;display:grid;gap:8px}.portfolio-icon-setting input[type="url"]{width:100%;box-sizing:border-box;background:#141815;border:1px solid #333934;color:#fff;padding:10px;border-radius:7px;font-size:11px}.portfolio-icon-setting input[type="file"]{width:100%;font-size:10px;color:#aaa}.portfolio-icon-actions{display:grid;grid-template-columns:1fr 1fr;gap:7px}.portfolio-icon-actions button{border:1px solid #333934;background:#141815;color:#aaa;padding:9px 6px;border-radius:7px;font-size:9px;font-weight:800;cursor:pointer}.portfolio-icon-actions button:first-child{background:#39ff00;border-color:#39ff00;color:#050505}.portfolio-icon-setting small{color:#747b75;font-size:9px}.portfolio-title-icon{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;margin-left:10px;border:1px solid rgba(var(--accent-rgb),.28);border-radius:10px;background:rgba(var(--accent-rgb),.05);vertical-align:middle}.portfolio-title-icon img{width:22px;height:22px;object-fit:contain;display:block}.content-manager{border:1px solid rgba(var(--accent-rgb),.16);border-radius:14px;background:linear-gradient(145deg,rgba(14,21,15,.9),rgba(5,9,6,.82));padding:14px;margin:8px 0 16px;box-shadow:inset 0 1px rgba(255,255,255,.035)}
 .content-manager>strong{display:block;font-size:12px;letter-spacing:.4px}.content-manager>small{display:block;color:#747b75;font-size:9px;line-height:1.55;margin:6px 0 12px}
 .cm-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}.cm-actions button,.cm-save,.cm-cancel,.cm-delete{border:1px solid #303730;background:#111612;color:#dfe5df;border-radius:8px;padding:10px 8px;font:800 9px/1 Inter,Arial,sans-serif;letter-spacing:.3px;cursor:pointer}.cm-actions button:hover,.cm-save:hover{background:var(--green);color:#041004;border-color:var(--green)}
 .cm-overlay{position:fixed;inset:0;background:rgba(0,0,0,.68);z-index:100;display:none;align-items:center;justify-content:center;padding:20px}.cm-overlay.open{display:flex}
@@ -1000,7 +1000,7 @@ body{padding-top:136px !important;}
 <div class="content-manager"><strong>Editor do BnhHub</strong><small>Você pode trocar nome, link, logo/foto e, no Portfolio, definir curtidas fictícias.</small><div class="cm-actions">
 <button type="button" data-cm-open="tools">FERRAMENTAS</button><button type="button" data-cm-open="sites">SITES</button><button type="button" data-cm-open="youtube">CANAIS</button><button type="button" data-cm-open="portfolio">PORTFOLIO</button>
 </div><button type="button" class="portfolio-add-setting" data-cm-open="portfolio">＋ ADICIONAR ARTE AO PORTFOLIO</button></div></div>
-<div class="setting-group team-selector-group"><b>Meu time</b><small class="team-selector-note">Escolha um clube do Brasileirão A/B ou das principais ligas europeias. Todos os clubes aparecem com escudo; a agenda muda automaticamente para o time selecionado.</small><div class="selected-team-card" id="selectedTeamCard"><img id="selectedTeamLogo" alt="Escudo do time selecionado"/><span><strong id="selectedTeamName">Flamengo</strong><small id="selectedTeamLeague">Brasil • Série A</small></span></div><div class="team-click-note">Clique diretamente no <b>escudo</b> do clube para trocar a agenda.</div><div class="team-groups" id="teamGroups"><div class="team-loading">Carregando clubes e escudos...</div></div></div>
+<div class="setting-group"><b>Ícone do Portfolio</b><small style="display:block;color:#747b75;margin-top:5px">Escolha o ícone que aparece ao lado do nome Portfolio. Você pode usar uma URL ou enviar uma imagem.</small><div class="portfolio-icon-setting"><input id="portfolioIconUrl" type="url" placeholder="https://.../icone.png"><input id="portfolioIconFile" accept="image/*" type="file"><div class="portfolio-icon-actions"><button type="button" id="savePortfolioIcon">SALVAR ÍCONE</button><button type="button" id="removePortfolioIcon">REMOVER</button></div><small id="portfolioIconStatus"></small></div></div><div class="setting-group team-selector-group"><b>Meu time</b><small class="team-selector-note">Escolha um clube do Brasileirão A/B ou das principais ligas europeias. Todos os clubes aparecem com escudo; a agenda muda automaticamente para o time selecionado.</small><div class="selected-team-card" id="selectedTeamCard"><img id="selectedTeamLogo" alt="Escudo do time selecionado"/><span><strong id="selectedTeamName">Flamengo</strong><small id="selectedTeamLeague">Brasil • Série A</small></span></div><div class="team-click-note">Clique diretamente no <b>escudo</b> do clube para trocar a agenda.</div><div class="team-groups" id="teamGroups"><div class="team-loading">Carregando clubes e escudos...</div></div></div>
 <div class="setting-group"><b>Informações</b><p>As configurações são salvas neste navegador e não alteram suas artes.</p></div>
 </div>
 </aside><div class="settings-overlay" id="settingsOverlay"></div>
@@ -1018,6 +1018,45 @@ body{padding-top:136px !important;}
     const url='https://www.google.com/search?q='+encodeURIComponent(query);
     window.open(url,'_blank','noopener,noreferrer');
   });
+})();
+</script>
+<script>
+(function setupPortfolioIconSetting(){
+  const KEY='bnhhub-portfolio-icon-v1';
+  const title=document.querySelector('#categorias .section-title h2');
+  const urlInput=document.getElementById('portfolioIconUrl');
+  const fileInput=document.getElementById('portfolioIconFile');
+  const status=document.getElementById('portfolioIconStatus');
+  const saveBtn=document.getElementById('savePortfolioIcon');
+  const removeBtn=document.getElementById('removePortfolioIcon');
+  if(!title)return;
+  const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
+  function apply(src){
+    title.querySelector('.portfolio-title-icon')?.remove();
+    if(!src)return;
+    const span=document.createElement('span');
+    span.className='portfolio-title-icon';
+    const img=document.createElement('img');
+    img.src=src; img.alt='Ícone do Portfolio'; img.loading='lazy';
+    span.appendChild(img); title.appendChild(span);
+  }
+  let saved=''; try{saved=localStorage.getItem(KEY)||''}catch{}
+  apply(saved);
+  if(urlInput)urlInput.value=saved.startsWith('data:')?'':saved;
+  saveBtn?.addEventListener('click',()=>{
+    const url=urlInput?.value.trim()||'';
+    const file=fileInput?.files?.[0];
+    const finish=src=>{
+      if(!src){status.textContent='Informe uma URL ou escolha uma imagem.';return;}
+      try{localStorage.setItem(KEY,src);apply(src);if(status)status.textContent='Ícone salvo neste navegador.'}catch{if(status)status.textContent='Não foi possível salvar o ícone.'}
+    };
+    if(file){
+      if(!file.type.startsWith('image/')){status.textContent='Escolha uma imagem válida.';return}
+      if(file.size>5*1024*1024){status.textContent='A imagem deve ter no máximo 5 MB.';return}
+      const reader=new FileReader(); reader.onload=()=>finish(String(reader.result)); reader.readAsDataURL(file);
+    }else finish(url);
+  });
+  removeBtn?.addEventListener('click',()=>{try{localStorage.removeItem(KEY)}catch{} apply(''); if(urlInput)urlInput.value=''; if(fileInput)fileInput.value=''; if(status)status.textContent='Ícone removido.'});
 })();
 </script>
 <script>
