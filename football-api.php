@@ -80,6 +80,14 @@ elseif($resource==='schedule' && $team!==''){
     foreach(($j['events']??[]) as $ev){$found=false;foreach(($ev['competitions'][0]['competitors']??[]) as $c){$tn=$c['team']['displayName']??$c['team']['name']??'';if($target!==''&&($target===norm_name($tn)||strpos(norm_name($tn),$target)!==false||strpos($target,norm_name($tn))!==false)){$found=true;break;}}if($found)$events[]=$ev;}
     echo json_encode(['events'=>$events],JSON_UNESCAPED_SLASHES|JSON_UNESCAPED_UNICODE);exit;
   }
+  // A ESPN possui uma rota específica para agenda do time que funciona melhor
+  // pelo host site.web.api.espn.com. Mantemos o host site.api como fallback.
+  $primaryUrl='https://site.web.api.espn.com/apis/site/v2/sports/soccer/all/teams/'.rawurlencode($team).'/schedule';
+  $out=http_json($primaryUrl);
+  if($out!==false){
+    $j=json_decode($out,true);
+    if(is_array($j)) { echo json_encode($j,JSON_UNESCAPED_SLASHES|JSON_UNESCAPED_UNICODE); exit; }
+  }
   $path="$league/teams/".rawurlencode($team)."/schedule";
 }else{http_response_code(400);echo json_encode(['error'=>'resource']);exit;}
 $url='https://site.api.espn.com/apis/site/v2/sports/soccer/'.$path;
