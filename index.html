@@ -1535,7 +1535,7 @@ const savedSpeed=localStorage.getItem('bnhhub-speed'); if(savedSpeed){document.q
       // Para times cadastrados na ESPN, usamos primeiro o endpoint de agenda do próprio time,
       // que contém jogos passados e futuros. Para entradas estáticas, usamos o scoreboard da ESPN.
       if(!String(t.id).startsWith('static-')){
-        const r=await fetch(apiBase+encodeURIComponent(t.league)+'/teams/'+encodeURIComponent(t.id)+'/schedule',{cache:'no-store'});
+        const r=await fetch('https://site.web.api.espn.com/apis/site/v2/sports/soccer/all/teams/'+encodeURIComponent(t.id)+'/schedule',{cache:'no-store'});
         if(r.ok){
           const schedule=await r.json();
           events=Array.isArray(schedule.events)?schedule.events:[];
