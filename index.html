@@ -1525,24 +1525,29 @@ const savedSpeed=localStorage.getItem('bnhhub-speed'); if(savedSpeed){document.q
     return out;
   }
   async function loadSchedule(t){
-    strip.innerHTML='<div class="agenda-loading">Atualizando agenda de '+esc(t.name)+'…</div>';
-    let lastError=null;
+    strip.innerHTML='<div class="agenda-loading">BUSCANDO PRÓXIMOS JOGOS NA ESPN • '+esc(t.name)+'…</div>';
     try{
-      let url='football-api.php?league='+encodeURIComponent(t.league)+'&resource=schedule&team='+encodeURIComponent(t.id)+'&name='+encodeURIComponent(t.name);
-      let r=await fetch(url,{cache:'no-store'});
-      if(r.ok){const data=await r.json();const events=Array.isArray(data.events)?data.events:[];if(events.length){renderAgenda(events);return;}lastError=new Error('Sem eventos no proxy');}
-      else lastError=new Error('Proxy '+r.status);
-    }catch(e){lastError=e}
-    try{
-      if(String(t.id).startsWith('static-')){
-        const data=await directScoreboard(t.league); const events=eventsForTeam(data,t); if(events.length){renderAgenda(events);return;}
-      }else{
+      // Fonte oficial da agenda: ESPN. O placar também fornece os escudos/logos oficiais das duas equipes.
+      // Usamos uma janela ampla para encontrar partidas futuras mesmo quando a equipe é uma entrada estática.
+      const data=await directScoreboard(t.league);
+      let events=eventsForTeam(data,t);
+      if(!events.length && !String(t.id).startsWith('static-')){
         const r=await fetch(apiBase+encodeURIComponent(t.league)+'/teams/'+encodeURIComponent(t.id)+'/schedule',{cache:'no-store'});
-        if(r.ok){const data=await r.json();const events=Array.isArray(data.events)?data.events:[];if(events.length){renderAgenda(events);return;}}
+        if(r.ok){
+          const schedule=await r.json();
+          events=Array.isArray(schedule.events)?schedule.events:[];
+        }
       }
-    }catch(e){lastError=e}
-    const when=new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
-    strip.innerHTML='<div class="agenda-error">Não foi possível carregar a agenda de '+esc(t.name)+' agora ('+when+'). Clique no escudo novamente para tentar.</div>';
+      if(events.length){
+        renderAgenda(events);
+        return;
+      }
+      const when=new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+      strip.innerHTML='<div class="agenda-error">A ESPN não retornou próximos jogos para '+esc(t.name)+' nesta janela ('+when+').</div>';
+    }catch(e){
+      const when=new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+      strip.innerHTML='<div class="agenda-error">Não foi possível consultar a ESPN agora ('+when+'). Tente novamente pelo escudo do time.</div>';
+    }
   }
   async function selectTeam(t,persist=true){current=t;if(persist)saveSelection();renderSelected();await loadSchedule(t)}
   loadTeams();setInterval(()=>{if(current)loadSchedule(current)},30*60*1000);
