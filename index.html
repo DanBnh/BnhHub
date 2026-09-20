@@ -1529,18 +1529,26 @@ const savedSpeed=localStorage.getItem('bnhhub-speed'); if(savedSpeed){document.q
     return out;
   }
   async function loadSchedule(t){
-    strip.innerHTML='<div class="agenda-loading">CARREGANDO AGENDA ESPN • '+esc(t.name)+'…</div>';
+    strip.innerHTML='<div class="agenda-loading">BUSCANDO JOGOS NA ESPN • '+esc(t.name)+'…</div>';
     try{
       let events=[];
-      // Para times cadastrados na ESPN, usamos primeiro o endpoint de agenda do próprio time,
-      // que contém jogos passados e futuros. Para entradas estáticas, usamos o scoreboard da ESPN.
-      if(!String(t.id).startsWith('static-')){
+      // Primeiro usa o proxy PHP do próprio BnhHub. Isso evita bloqueios de CORS
+      // e permite buscar jogos passados + futuros diretamente da ESPN.
+      const proxyUrl='football-api.php?resource=schedule&league='+encodeURIComponent(t.league)+'&team='+encodeURIComponent(t.id||'')+'&name='+encodeURIComponent(t.name||'');
+      const pr=await fetch(proxyUrl,{cache:'no-store'});
+      if(pr.ok){
+        const data=await pr.json();
+        events=Array.isArray(data?.events)?data.events:[];
+      }
+      // Fallback direto na ESPN para equipes que possuem ID oficial.
+      if(!events.length && !String(t.id).startsWith('static-')){
         const r=await fetch('https://site.web.api.espn.com/apis/site/v2/sports/soccer/all/teams/'+encodeURIComponent(t.id)+'/schedule',{cache:'no-store'});
         if(r.ok){
           const schedule=await r.json();
           events=Array.isArray(schedule.events)?schedule.events:[];
         }
       }
+      // Último fallback: placar da competição + correspondência pelo nome.
       if(!events.length){
         const data=await directScoreboard(t.league);
         events=eventsForTeam(data,t);
@@ -1553,7 +1561,7 @@ const savedSpeed=localStorage.getItem('bnhhub-speed'); if(savedSpeed){document.q
       strip.innerHTML='<div class="agenda-error">A ESPN não encontrou jogos para '+esc(t.name)+' agora ('+when+').</div>';
     }catch(e){
       const when=new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
-      strip.innerHTML='<div class="agenda-error">Não foi possível consultar a ESPN agora ('+when+'). Tente novamente pelo escudo do time.</div>';
+      strip.innerHTML='<div class="agenda-error">Não foi possível consultar a ESPN agora ('+when+'). Tente novamente.</div>';
     }
   }
   async function selectTeam(t,persist=true){current=t;if(persist)saveSelection();renderSelected();await loadSchedule(t)}
